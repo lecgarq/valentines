@@ -576,7 +576,7 @@ export default function App() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-  const [audioSrc, setAudioSrc] = useState<string>("/song.mp3");
+  const [audioSrc, setAudioSrc] = useState<string>("/bg-music.mp3");
   const [hasAudioError, setHasAudioError] = useState(false);
 
   const startMusic = () => {
