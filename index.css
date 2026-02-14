@@ -1,4 +1,6 @@
-/* Tailwind is loaded via CDN in index.html */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --foreground-rgb: 0, 0, 0;
@@ -9,6 +11,7 @@
 body {
   color: rgb(var(--foreground-rgb));
   background: #fafafa;
+  font-family: 'Inter', sans-serif;
 }
 
 * {
