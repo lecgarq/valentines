@@ -1,7 +1,4 @@
-/* Basic styles */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Tailwind is loaded via CDN in index.html */
 
 :root {
   --foreground-rgb: 0, 0, 0;
