@@ -161,8 +161,8 @@ const QuizStep: React.FC<{ onNext: () => void }> = ({ onNext }) => {
 const ProposalStep: React.FC<{ onYes: () => void }> = ({ onYes }) => {
   const [noCount, setNoCount] = useState(0);
 
-  // Yes button grows with each "No" click
-  const yesScale = 1 + (noCount * 0.15); 
+  // Yes button grows with each "No" click - Increased limit to prevent excessive scaling
+  const yesScale = Math.min(1 + (noCount * 0.12), 2.5); 
   
   // Show No button as long as there are phrases left
   const showNoButton = noCount < NO_BUTTON_PHRASES.length;
@@ -201,8 +201,8 @@ const ProposalStep: React.FC<{ onYes: () => void }> = ({ onYes }) => {
         >
           <Button 
             onClick={onYes} 
-            className="text-xl py-6 px-12 shadow-xl bg-rose-500 hover:bg-rose-600 text-white min-w-[200px]"
-            icon={<Sparkles className="w-6 h-6" />}
+            className="text-lg md:text-xl py-4 md:py-6 px-8 md:px-12 shadow-xl bg-rose-500 hover:bg-rose-600 text-white min-w-[160px] md:min-w-[200px]"
+            icon={<Sparkles className="w-5 h-5 md:w-6 md:h-6" />}
           >
             ¡Sí, claro que sí!
           </Button>
@@ -220,7 +220,7 @@ const ProposalStep: React.FC<{ onYes: () => void }> = ({ onYes }) => {
               <Button 
                 variant="danger" 
                 onClick={handleNoClick}
-                className="whitespace-nowrap min-w-[140px] text-lg bg-neutral-200/80 hover:bg-neutral-300 text-neutral-600"
+                className="whitespace-normal max-w-[200px] text-sm md:text-lg bg-neutral-200/80 hover:bg-neutral-300 text-neutral-600 px-4 py-2"
               >
                 {NO_BUTTON_PHRASES[noCount]}
               </Button>
@@ -494,7 +494,7 @@ const LetterStep: React.FC = () => {
         <motion.div 
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
-            className="w-full max-w-lg mx-auto p-4 pb-48 space-y-6 text-left"
+            className="w-full max-w-lg mx-auto p-4 pb-32 space-y-6 text-left"
         >
             <div id="letter-content" className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-neutral-100 space-y-6">
                  {/* Decorative Header */}
@@ -576,7 +576,7 @@ export default function App() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-  const [audioSrc, setAudioSrc] = useState<string>("/bg-music.mp3");
+  const [audioSrc] = useState<string>(`${import.meta.env.BASE_URL}bg-music.mp3`);
   const [hasAudioError, setHasAudioError] = useState(false);
 
   const startMusic = () => {
@@ -591,12 +591,6 @@ export default function App() {
   };
 
   const toggleMusic = () => {
-    if (hasAudioError && fileInputRef.current) {
-        // If audio failed, clicking volume button opens file selector
-        fileInputRef.current.click();
-        return;
-    }
-
     if (audioRef.current) {
       if (isMusicPlaying) {
         audioRef.current.pause();
@@ -613,20 +607,6 @@ export default function App() {
       setIsMusicPlaying(false);
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
-      if (file) {
-          const objectUrl = URL.createObjectURL(file);
-          setAudioSrc(objectUrl);
-          setHasAudioError(false);
-          // Auto play new song
-          setTimeout(() => {
-              if (audioRef.current) {
-                  audioRef.current.play().then(() => setIsMusicPlaying(true));
-              }
-          }, 100);
-      }
-  };
 
   const handleNext = () => {
     if (step === AppStep.INTRO) {
@@ -662,7 +642,7 @@ export default function App() {
 
   return (
     // Updated container: uses h-[100dvh] for mobile browser compatibility and proper internal scrolling
-    <div className="fixed inset-0 w-full bg-[#FAFAFA] text-neutral-900 flex flex-col items-center overflow-x-hidden overflow-y-auto supports-[height:100dvh]:h-[100dvh] h-screen">
+    <div className="fixed inset-0 w-full bg-[#FAFAFA] text-neutral-900 flex flex-col items-center overflow-x-hidden overflow-y-auto supports-[height:100dvh]:h-dvh h-screen">
       
       {/* Background Music */}
       <audio 
@@ -671,32 +651,14 @@ export default function App() {
         src={audioSrc} 
         onError={handleAudioError}
       />
-      <input 
-        type="file" 
-        ref={fileInputRef} 
-        className="hidden" 
-        accept="audio/*" 
-        onChange={handleFileChange}
-      />
       
       {/* Music Control */}
       <button 
         onClick={toggleMusic}
-        className={`fixed top-4 right-4 z-50 p-3 backdrop-blur-sm rounded-full shadow-sm transition-colors ${
-            hasAudioError 
-                ? 'bg-yellow-50 text-yellow-600 hover:bg-yellow-100 animate-pulse' 
-                : 'bg-white/80 text-neutral-400 hover:text-rose-500'
-        }`}
-        title={hasAudioError ? "Click to upload a song" : "Toggle Music"}
+        className="fixed top-4 right-4 z-50 p-3 backdrop-blur-sm rounded-full shadow-sm transition-colors bg-white/80 text-neutral-400 hover:text-rose-500"
+        title="Toggle Music"
       >
-        {hasAudioError ? (
-            <span className="flex items-center gap-2 text-xs font-medium px-1">
-                <VolumeX className="w-5 h-5" />
-                <span className="hidden md:inline">Subir canción</span>
-            </span>
-        ) : (
-            isMusicPlaying ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />
-        )}
+        {isMusicPlaying ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
       </button>
 
       {/* Background decorations - Fixed position to stay in background while scrolling */}
